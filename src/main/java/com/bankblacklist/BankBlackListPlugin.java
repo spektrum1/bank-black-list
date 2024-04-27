@@ -68,13 +68,14 @@ public class BankBlackListPlugin extends Plugin
 		{
 			return;
 		}
-		blacklist = formatConfigString();
+		blacklist = formatBlacklistFromConfig();
 		loadCurrentBankItems();
 		searchBankForContraband();
 	}
 
-	private String[] formatConfigString(){
-		String[] blackList = config.blackList().split(",");
+	private String[] formatBlacklistFromConfig(){
+		String initialBlackList = config.blackList().trim();
+		String[] blackList = initialBlackList.split(",");
 		String[] blackListFormatted = new String[blackList.length];
 		for (int i = 0; i < blackList.length; i++) {
 			blackListFormatted[i] = blackList[i].trim();

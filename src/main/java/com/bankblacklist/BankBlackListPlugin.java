@@ -133,7 +133,6 @@ public class BankBlackListPlugin extends Plugin
 						.type(ChatMessageType.CONSOLE)
 						.runeLiteFormattedMessage(message)
 						.build());
-
 	}
 
 	@Provides

@@ -23,10 +23,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package com.bankblacklist;
 
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
-
 
 @ConfigGroup("Block List")
 public interface Config extends net.runelite.client.config.Config

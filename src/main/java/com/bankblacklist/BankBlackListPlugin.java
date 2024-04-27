@@ -38,19 +38,6 @@ public class BankBlackListPlugin extends Plugin
 
 	private static final String	BLACKLIST_MESSAGE = "You have a blacklisted item in your bank: ";
 
-
-	@Subscribe
-	public void onWidgetLoaded(WidgetLoaded event)
-	{
-		if (event.getGroupId() != WidgetID.BANK_GROUP_ID)
-		{
-			return;
-		}
-		blacklist = formatConfigString();
-		loadCurrentBankItems();
-		searchBankForContraband();
-	}
-
 	@Subscribe
 	public void onWidgetClosed(WidgetClosed event)
 	{

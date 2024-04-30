@@ -92,9 +92,10 @@ public class BankBlackListPlugin extends Plugin
 		{
 			for (Item bankItem: bankItems.getItems())
 			{
-				if (itemManager.getItemComposition(bankItem.getId()).getName().contains(item))
+				String bankItemName = itemManager.getItemComposition(bankItem.getId()).getName();
+				if (bankItemName.contains(item))
 				{
-					sendChatMessage(BLACKLIST_MESSAGE + itemManager.getItemComposition(bankItem.getId()).getName());
+					sendChatMessage(BLACKLIST_MESSAGE + bankItemName);
 				}
 			}
 		}

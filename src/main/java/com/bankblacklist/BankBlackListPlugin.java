@@ -29,7 +29,6 @@ import com.google.inject.Provides;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.ItemID;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.widgets.InterfaceID;
 import net.runelite.client.chat.ChatColorType;
@@ -38,9 +37,9 @@ import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import java.lang.reflect.Field;
 
 @Slf4j
 @PluginDescriptor(
@@ -54,6 +53,8 @@ public class BankBlackListPlugin extends Plugin
 	private Config config;
 	@Inject
 	private ChatMessageManager chatMessageManager;
+	@Inject
+	private ItemManager itemManager;
 
 	private String[] blacklist;
 
@@ -79,8 +80,8 @@ public class BankBlackListPlugin extends Plugin
 		String[] blackListFormatted = new String[blackList.length];
 		for (int i = 0; i < blackList.length; i++) {
 			blackListFormatted[i] = blackList[i].trim();
-			blackListFormatted[i] = blackListFormatted[i].toUpperCase();
-			blackListFormatted[i] = blackListFormatted[i].replace(" ", "_");
+			blackListFormatted[i] = blackListFormatted[i].toLowerCase();
+			blackListFormatted[i] = blackListFormatted[i].substring(0, 1).toUpperCase() + blackListFormatted[i].substring(1);;
 		}
 		return blackListFormatted;
 	}
@@ -91,9 +92,9 @@ public class BankBlackListPlugin extends Plugin
 		{
 			for (Item bankItem: bankItems.getItems())
 			{
-				if (bankItem.getId() == getItemID(item))
+				if (itemManager.getItemComposition(bankItem.getId()).getName().contains(item))
 				{
-					sendChatMessage(BLACKLIST_MESSAGE + item.replace("_"," "));
+					sendChatMessage(BLACKLIST_MESSAGE + itemManager.getItemComposition(bankItem.getId()).getName());
 				}
 			}
 		}
@@ -104,23 +105,6 @@ public class BankBlackListPlugin extends Plugin
 		bankItems = client.getItemContainer(InventoryID.BANK);
 	}
 
-	private int getItemID(String item)
-	{
-		Field field = null;
-		int value = 0;
-		try
-		{
-			field = ItemID.class.getDeclaredField(item);
-			value = (int)field.get(ItemID.class);
-		} catch (NoSuchFieldException e)
-		{
-			e.printStackTrace();
-		} catch (IllegalAccessException e)
-		{
-			e.printStackTrace();
-		}
-		return value;
-	}
 
 	private void sendChatMessage(String chatMessage)
 	{

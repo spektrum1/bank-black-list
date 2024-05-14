@@ -28,7 +28,7 @@ package com.bankblacklist;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("Block List")
+@ConfigGroup("Bank Block List")
 public interface Config extends net.runelite.client.config.Config
 {
 	@ConfigItem(

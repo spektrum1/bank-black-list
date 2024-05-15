@@ -36,9 +36,18 @@ public interface Config extends net.runelite.client.config.Config
 		name = "Black List",
 		description = "Add items to cause a warning notification if banked."
 	)
-
 	default String blackList()
 	{
 		return "";
+	}
+
+	@ConfigItem(
+		keyName = "includePlaceholders",
+		name = "Include Placeholders",
+		description = "Determines if to trigger warnings on placeholders."
+	)
+	default boolean includePlaceholders()
+	{
+		return true;
 	}
 }

@@ -60,6 +60,8 @@ public class BankBlackListPlugin extends Plugin
 
 	private ItemContainer bankItems;
 
+	private boolean PLACEHOLDERS_INCLUDED = true;
+
 	private static final String	BLACKLIST_MESSAGE = "You have a blacklisted item in your bank: ";
 
 	@Subscribe
@@ -70,6 +72,7 @@ public class BankBlackListPlugin extends Plugin
 			return;
 		}
 		blacklist = formatBlacklistFromConfig();
+		PLACEHOLDERS_INCLUDED = config.includePlaceholders();
 		loadCurrentBankItems();
 		searchBankForContraband();
 	}
@@ -92,7 +95,12 @@ public class BankBlackListPlugin extends Plugin
 		{
 			for (Item bankItem: bankItems.getItems())
 			{
-				String bankItemName = itemManager.getItemComposition(bankItem.getId()).getName();
+				ItemComposition bankItemComposition = itemManager.getItemComposition(bankItem.getId());
+				if (bankItemComposition.getPlaceholderTemplateId() != -1 && !PLACEHOLDERS_INCLUDED) //checks if placeholders should be ignored, -1 is a real item while 14401 is a placeholder
+				{
+					continue;
+				}
+				String bankItemName = bankItemComposition.getName();
 				if (bankItemName.contains(item))
 				{
 					sendChatMessage(BLACKLIST_MESSAGE + bankItemName);
@@ -105,7 +113,6 @@ public class BankBlackListPlugin extends Plugin
 	{
 		bankItems = client.getItemContainer(InventoryID.BANK);
 	}
-
 
 	private void sendChatMessage(String chatMessage)
 	{

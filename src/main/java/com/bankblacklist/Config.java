@@ -42,6 +42,13 @@ public interface Config extends net.runelite.client.config.Config
 	}
 
 	@ConfigItem(
+		keyName = "blackList",
+		name = "",
+		description = ""
+	)
+	void setBlackList(String key);
+
+	@ConfigItem(
 		keyName = "includePlaceholders",
 		name = "Include Placeholders",
 		description = "Determines if to trigger warnings on placeholders."
@@ -49,5 +56,15 @@ public interface Config extends net.runelite.client.config.Config
 	default boolean includePlaceholders()
 	{
 		return true;
+	}
+
+	@ConfigItem(
+		keyName = "enableShiftClick",
+		name = "Enable shift click to add/remove items",
+		description = "Determines if to trigger add/remove option on shift click."
+	)
+	default boolean enableShiftClick()
+	{
+		return false;
 	}
 }

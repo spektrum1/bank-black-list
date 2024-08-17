@@ -26,11 +26,17 @@
 package com.bankblacklist;
 
 import com.google.inject.Provides;
+import java.util.Arrays;
+import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
+import net.runelite.api.Menu;
+import net.runelite.api.events.MenuOpened;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.widgets.InterfaceID;
+import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetUtil;
 import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
@@ -64,6 +70,8 @@ public class BankBlackListPlugin extends Plugin
 
 	private static final String	BLACKLIST_MESSAGE = "You have a blacklisted item in your bank: ";
 
+	private final List<Integer> includedMenus = Arrays.asList(InterfaceID.BANK, InterfaceID.INVENTORY);
+
 	@Subscribe
 	public void onWidgetClosed(WidgetClosed event)
 	{
@@ -77,16 +85,70 @@ public class BankBlackListPlugin extends Plugin
 		searchBankForContraband();
 	}
 
+	@Subscribe
+	public void onMenuOpened(final MenuOpened event)
+	{
+		if (!client.isKeyPressed(KeyCode.KC_SHIFT) || !config.enableShiftClick())
+		{
+			return;
+		}
+		blacklist = formatBlacklistFromConfig();
+		final MenuEntry[] entries = event.getMenuEntries();
+		for (int idx = entries.length - 1; idx >= 0; --idx)
+		{
+			final MenuEntry entry = entries[idx];
+			final Widget w = entry.getWidget();
+
+			if (w != null && includedMenus.contains(WidgetUtil.componentToInterface(w.getId()))
+				&& "Examine".equals(entry.getOption()) && entry.getIdentifier() == 10)
+			{
+				final String itemName = itemManager.getItemComposition(w.getItemId()).getName();
+
+				final MenuEntry parent = client.createMenuEntry(idx)
+					.setOption("Black list")
+					.setTarget(entry.getTarget())
+					.setType(MenuAction.RUNELITE);
+				final Menu submenu = parent.createSubMenu();
+
+				if (Arrays.stream(blacklist).anyMatch(itemName::equals))
+				{
+					submenu.createMenuEntry(0)
+						.setOption("Remove from list")
+						.setType(MenuAction.RUNELITE)
+						.onClick(e ->
+						{
+							removeBlackListItem(itemName);
+						});
+				}
+				else {
+					submenu.createMenuEntry(0)
+						.setOption("Add to list")
+						.setType(MenuAction.RUNELITE)
+						.onClick(e ->
+						{
+							addBlackListItem(itemName);
+						});
+				}
+			}
+		}
+	}
+
 	private String[] formatBlacklistFromConfig(){
 		String initialBlackList = config.blackList().trim();
 		String[] blackList = initialBlackList.split(",");
-		String[] blackListFormatted = new String[blackList.length];
+		String[] blackListFormattedArray = new String[blackList.length];
+		String blackListFormattedSingleString = new String();
 		for (int i = 0; i < blackList.length; i++) {
-			blackListFormatted[i] = blackList[i].trim();
-			blackListFormatted[i] = blackListFormatted[i].toLowerCase();
-			blackListFormatted[i] = blackListFormatted[i].substring(0, 1).toUpperCase() + blackListFormatted[i].substring(1);;
+			if (blackList[i].length() > 0)
+			{
+				blackListFormattedArray[i] = blackList[i].trim();
+				blackListFormattedArray[i] = blackListFormattedArray[i].toLowerCase();
+				blackListFormattedArray[i] = blackListFormattedArray[i].substring(0, 1).toUpperCase() + blackListFormattedArray[i].substring(1);
+				blackListFormattedSingleString += blackListFormattedArray[i] + ",";
+			}
 		}
-		return blackListFormatted;
+		config.setBlackList(blackListFormattedSingleString);
+		return blackListFormattedArray;
 	}
 
 	private void searchBankForContraband()
@@ -108,6 +170,38 @@ public class BankBlackListPlugin extends Plugin
 			}
 		}
 	}
+
+	private void addBlackListItem(String itemName)
+	{
+		String currentBlackList = config.blackList().trim();
+
+		if (currentBlackList.isEmpty())
+		{
+			config.setBlackList(itemName);
+		} else
+		{
+			config.setBlackList(currentBlackList + "," + itemName);
+		}
+	}
+
+	private void removeBlackListItem(String itemName)
+	{
+		String[] parts = config.blackList().split(",\\s*");
+
+		StringBuilder result = new StringBuilder();
+
+		// Iterate over the parts and append them if they do not match the substringToRemove
+		for (String part : parts) {
+			if (!part.equalsIgnoreCase(itemName)) {
+				if (result.length() > 0) {
+					result.append(", ");
+				}
+				result.append(part);
+			}
+		}
+		config.setBlackList(result.toString());
+	}
+
 
 	private void loadCurrentBankItems()
 	{

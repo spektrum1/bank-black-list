@@ -133,22 +133,25 @@ public class BankBlackListPlugin extends Plugin
 		}
 	}
 
-	private String[] formatBlacklistFromConfig(){
+	private String[] formatBlacklistFromConfig() {
 		String initialBlackList = config.blackList().trim();
 		String[] blackList = initialBlackList.split(",");
-		String[] blackListFormattedArray = new String[blackList.length];
-		String blackListFormattedSingleString = new String();
-		for (int i = 0; i < blackList.length; i++) {
-			if (blackList[i].length() > 0)
+
+		String[] formattedBlacklistArray = Arrays.stream(blackList)
+			.map(String::trim)
+			.filter(item -> !item.isEmpty())
+			.map(item ->
 			{
-				blackListFormattedArray[i] = blackList[i].trim();
-				blackListFormattedArray[i] = blackListFormattedArray[i].toLowerCase();
-				blackListFormattedArray[i] = blackListFormattedArray[i].substring(0, 1).toUpperCase() + blackListFormattedArray[i].substring(1);
-				blackListFormattedSingleString += blackListFormattedArray[i] + ",";
-			}
-		}
-		config.setBlackList(blackListFormattedSingleString);
-		return blackListFormattedArray;
+				String lowercased = item.toLowerCase();
+				return Character.toUpperCase(lowercased.charAt(0)) + lowercased.substring(1);
+			})
+			.toArray(String[]::new);
+
+		String formattedBlacklistSingleString = String.join(",", formattedBlacklistArray);
+
+		config.setBlackList(formattedBlacklistSingleString);
+
+		return formattedBlacklistArray;
 	}
 
 	private void searchBankForContraband()

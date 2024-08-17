@@ -104,7 +104,7 @@ public class BankBlackListPlugin extends Plugin
 			{
 				final String itemName = itemManager.getItemComposition(w.getItemId()).getName();
 
-				final MenuEntry parent = client.createMenuEntry(idx)
+				final MenuEntry parent = client.getMenu().createMenuEntry(idx)
 					.setOption("Black list")
 					.setTarget(entry.getTarget())
 					.setType(MenuAction.RUNELITE);
